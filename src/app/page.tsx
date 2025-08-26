@@ -20,6 +20,12 @@ export default function HomePage() {
             Encuentra los mejores productos fitness para alcanzar tus objetivos. 
             Equipos, ropa deportiva y suplementos de la más alta calidad.
           </p>
+          {/* Test directo */}
+          <div className="mb-4">
+            <p style={{color: 'white'}}>¿Puedes ver este texto con style directo?</p>
+            <p className="text-white">¿Puedes ver este texto con class text-white?</p>
+            <p className="!text-white">¿Puedes ver este texto con !text-white?</p>
+          </div>
           <Link 
             href="/products" 
             className="inline-block bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
