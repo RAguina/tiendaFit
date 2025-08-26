@@ -25,22 +25,33 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const savedTheme = localStorage.getItem('theme') as Theme
         if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
           setTheme(savedTheme)
-          document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+          applyTheme(savedTheme)
         } else {
           // Check system preference
           const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
           const systemTheme = systemPrefersDark ? 'dark' : 'light'
           setTheme(systemTheme)
-          document.documentElement.classList.toggle('dark', systemTheme === 'dark')
+          applyTheme(systemTheme)
           localStorage.setItem('theme', systemTheme)
         }
       } catch (error) {
         console.warn('Error initializing theme:', error)
         // Fallback to light theme
         setTheme('light')
-        document.documentElement.classList.remove('dark')
+        applyTheme('light')
       } finally {
         setIsLoading(false)
+      }
+    }
+
+    const applyTheme = (theme: Theme) => {
+      const root = document.documentElement
+      if (theme === 'dark') {
+        root.classList.add('dark')
+        root.style.colorScheme = 'dark'
+      } else {
+        root.classList.remove('dark')
+        root.style.colorScheme = 'light'
       }
     }
 
@@ -51,9 +62,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (isLoading) return
     
     // Save to localStorage and update document class when theme changes
+    const applyTheme = (theme: Theme) => {
+      const root = document.documentElement
+      if (theme === 'dark') {
+        root.classList.add('dark')
+        root.style.colorScheme = 'dark'
+      } else {
+        root.classList.remove('dark')
+        root.style.colorScheme = 'light'
+      }
+    }
+    
     try {
       localStorage.setItem('theme', theme)
-      document.documentElement.classList.toggle('dark', theme === 'dark')
+      applyTheme(theme)
     } catch (error) {
       console.warn('Error saving theme:', error)
     }
