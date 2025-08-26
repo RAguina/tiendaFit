@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${inter.className} bg-white dark:bg-gray-900 transition-colors duration-200`}>
+      <body className={`${inter.className} bg-white dark:bg-gray-900`}>
         <ThemeProvider>
           <CartProvider>
             <ThemeScript />

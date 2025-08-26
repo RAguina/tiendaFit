@@ -22,7 +22,7 @@ export default function HomePage() {
           </p>
           <Link 
             href="/products" 
-            className="inline-block bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="inline-block bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             Explorar Productos
           </Link>
@@ -36,17 +36,17 @@ export default function HomePage() {
             Nuestras Categorías
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg">
               <div className="text-4xl mb-4">🏋️</div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Equipos de Gimnasio</h3>
               <p className="text-gray-600 dark:text-gray-400">Mancuernas, barras, máquinas y más</p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg">
               <div className="text-4xl mb-4">👕</div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Ropa Deportiva</h3>
               <p className="text-gray-600 dark:text-gray-400">Camisetas, shorts, zapatillas y accesorios</p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center hover:shadow-lg">
               <div className="text-4xl mb-4">💊</div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Suplementos</h3>
               <p className="text-gray-600 dark:text-gray-400">Proteínas, vitaminas y nutrición deportiva</p>
@@ -63,7 +63,7 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={product.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg">
                 <img 
                   src={product.image} 
                   alt={product.name}
@@ -81,7 +81,7 @@ export default function HomePage() {
                   </p>
                   <button 
                     onClick={() => addToCart(product)}
-                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors font-medium"
+                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg font-medium"
                   >
                     Agregar al Carrito
                   </button>
