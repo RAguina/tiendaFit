@@ -12,3 +12,8 @@
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
+
+/* Force button text color to ensure visibility */
+.btn-primary {
+  color: white !important;
+}
