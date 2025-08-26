@@ -40,7 +40,13 @@ export default function Header() {
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
               title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             >
-              {isLoading ? '⏳' : theme === 'light' ? '🌙' : '☀️'}
+              {isLoading ? (
+                <span className="inline-block w-5 h-5 text-center">⏳</span>
+              ) : theme === 'light' ? (
+                <span className="inline-block w-5 h-5 text-center">🌙</span>
+              ) : (
+                <span className="inline-block w-5 h-5 text-center">☀️</span>
+              )}
             </button>
 
             {/* Cart Button */}
