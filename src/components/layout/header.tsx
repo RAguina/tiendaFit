@@ -5,7 +5,7 @@ import { useTheme } from '@/contexts/theme-context'
 import { useCart } from '@/contexts/cart-context'
 
 export default function Header() {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme, isLoading } = useTheme()
   const { getTotalItems } = useCart()
 
   return (
@@ -35,10 +35,12 @@ export default function Header() {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              aria-label="Toggle theme"
+              disabled={isLoading}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             >
-              {theme === 'light' ? '🌙' : '☀️'}
+              {isLoading ? '⏳' : theme === 'light' ? '🌙' : '☀️'}
             </button>
 
             {/* Cart Button */}
