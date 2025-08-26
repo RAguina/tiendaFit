@@ -3,13 +3,13 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const inputVariants = cva(
-  'flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex h-10 w-full rounded-md border bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 px-3 py-2 text-sm ring-offset-white dark:ring-offset-gray-950 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'border-gray-200 focus-visible:ring-gray-950',
-        error: 'border-red-500 focus-visible:ring-red-500',
-        success: 'border-green-500 focus-visible:ring-green-500',
+        default: 'border-gray-200 dark:border-gray-800 focus-visible:ring-gray-950 dark:focus-visible:ring-gray-300',
+        error: 'border-red-500 dark:border-red-900 focus-visible:ring-red-500 dark:focus-visible:ring-red-900',
+        success: 'border-green-500 dark:border-green-900 focus-visible:ring-green-500 dark:focus-visible:ring-green-900',
       },
       size: {
         default: 'h-10 px-3 py-2',
@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label 
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             {label}
           </label>
@@ -98,12 +98,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-600">
+          <p id={errorId} className="mt-1 text-sm text-red-600 dark:text-red-400">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={helperTextId} className="mt-1 text-sm text-gray-500">
+          <p id={helperTextId} className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {helperText}
           </p>
         )}
