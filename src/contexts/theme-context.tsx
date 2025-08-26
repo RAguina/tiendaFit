@@ -17,9 +17,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [isLoading, setIsLoading] = useState(true)
 
-  const applyTheme = (theme: Theme) => {
+  const applyTheme = (themeToApply: Theme) => {
+    if (typeof window === 'undefined') return
+    
     const root = document.documentElement
-    if (theme === 'dark') {
+    if (themeToApply === 'dark') {
       root.classList.add('dark')
       root.style.colorScheme = 'dark'
     } else {
@@ -30,7 +32,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Initialize theme on client side only
-    const initializeTheme = () => {
+    const initializeTheme = async () => {
       try {
         // Check localStorage for saved theme
         const savedTheme = localStorage.getItem('theme') as Theme
@@ -50,9 +52,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         // Fallback to light theme
         setTheme('light')
         applyTheme('light')
-      } finally {
-        setIsLoading(false)
       }
+      
+      // Set loading to false after a small delay to ensure everything is applied
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 100)
     }
 
     initializeTheme()
