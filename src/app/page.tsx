@@ -11,12 +11,12 @@ export default function HomePage() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-20">
+      <section className="bg-gradient-to-r from-primary-600 to-primary-800 py-20">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6">
+          <h1 className="text-5xl font-bold mb-6 text-white">
             Transforma tu Cuerpo
           </h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+          <p className="text-xl mb-8 max-w-2xl mx-auto text-white">
             Encuentra los mejores productos fitness para alcanzar tus objetivos. 
             Equipos, ropa deportiva y suplementos de la más alta calidad.
           </p>
@@ -81,7 +81,7 @@ export default function HomePage() {
                   </p>
                   <button 
                     onClick={() => addToCart(product)}
-                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors"
+                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors font-medium btn-primary"
                   >
                     Agregar al Carrito
                   </button>
