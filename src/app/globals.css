@@ -30,15 +30,6 @@
     transition: background-color 0.2s ease, color 0.2s ease;
   }
   
-  /* Light theme (default) */
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-  }
-  
-  /* Dark theme */
-  html.dark body {
-    background-color: var(--color-dark-background);
-    color: var(--color-dark-foreground);
-  }
+  /* Let Tailwind handle the theming via classes instead of custom CSS */
+  /* This allows Tailwind dark: classes to work properly */
 }
