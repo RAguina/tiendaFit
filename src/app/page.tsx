@@ -81,7 +81,7 @@ export default function HomePage() {
                   </p>
                   <button 
                     onClick={() => addToCart(product)}
-                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors font-medium btn-primary"
+                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors font-medium"
                   >
                     Agregar al Carrito
                   </button>
