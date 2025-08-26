@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/contexts/theme-context'
 import { CartProvider } from '@/contexts/cart-context'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
+import DebugTheme from '@/components/debug-theme'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,8 +30,13 @@ export default function RootLayout({
                   var theme = localStorage.getItem('theme');
                   if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
                   }
-                } catch (e) {}
+                } catch (e) {
+                  // Fallback: remove dark class if there's any error
+                  document.documentElement.classList.remove('dark');
+                }
               })();
             `,
           }}
@@ -45,6 +51,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <DebugTheme />
             </div>
           </CartProvider>
         </ThemeProvider>
