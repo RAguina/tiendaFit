@@ -10,10 +10,11 @@
   
   body {
     transition: background-color 0.2s ease, color 0.2s ease;
+    color: #1f2937; /* Default text color for light theme */
+  }
+  
+  .dark body {
+    color: #f9fafb; /* Default text color for dark theme */
   }
 }
 
-/* Force button text color to ensure visibility */
-.btn-primary {
-  color: white !important;
-}
