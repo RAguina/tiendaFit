@@ -6,10 +6,21 @@ import { useRouter } from "next/navigation"
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<{
+    hasSession: boolean
+    userEmail?: string
+    userRole?: string
+  } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     getSession().then(session => {
+      console.log("🔍 Current session:", session)
+      setDebugInfo({ 
+        hasSession: !!session,
+        userEmail: session?.user?.email,
+        userRole: session?.user?.role 
+      })
       if (session) {
         router.push("/")
       }
@@ -17,8 +28,17 @@ export default function SignInPage() {
   }, [router])
 
   const handleGoogleSignIn = async () => {
+    console.log("🚀 Starting Google sign in...")
     setLoading(true)
-    await signIn("google", { callbackUrl: "/" })
+    try {
+      const result = await signIn("google", { 
+        callbackUrl: "/",
+        redirect: false
+      })
+      console.log("🎯 SignIn result:", result)
+    } catch (error) {
+      console.error("❌ SignIn error:", error)
+    }
     setLoading(false)
   }
 
@@ -41,6 +61,12 @@ export default function SignInPage() {
           >
             {loading ? "Conectando..." : "Continuar con Google"}
           </button>
+          {debugInfo && (
+            <div className="mt-4 p-4 bg-gray-100 rounded-md text-xs">
+              <strong>Debug Info:</strong>
+              <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+            </div>
+          )}
         </div>
       </div>
     </div>
