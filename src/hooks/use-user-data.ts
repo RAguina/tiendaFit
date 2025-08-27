@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 interface UserStats {
   totalOrders: number
@@ -7,12 +7,33 @@ interface UserStats {
   totalAddresses: number
 }
 
+interface Address {
+  id: string
+  firstName: string
+  lastName: string
+  company?: string
+  address1: string
+  address2?: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+  phone?: string
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 interface UserData {
   stats: UserStats
   recentOrders: any[]
-  addresses: any[]
+  addresses: Address[]
   loading: boolean
   error: string | null
+  refreshAddresses: () => Promise<void>
+  addAddress: (address: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>
+  updateAddress: (id: string, address: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>
+  deleteAddress: (id: string) => Promise<void>
 }
 
 export function useUserData(): UserData {
@@ -23,9 +44,93 @@ export function useUserData(): UserData {
     totalAddresses: 0
   })
   const [recentOrders, setRecentOrders] = useState<any[]>([])
-  const [addresses, setAddresses] = useState<any[]>([])
+  const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const refreshAddresses = useCallback(async () => {
+    if (!session?.user?.id) return
+
+    try {
+      const response = await fetch('/api/addresses')
+      if (!response.ok) {
+        throw new Error('Error al cargar direcciones')
+      }
+      const addressesData = await response.json()
+      setAddresses(addressesData)
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalAddresses: addressesData.length
+      }))
+    } catch (err) {
+      console.error('Error fetching addresses:', err)
+      setError('Error al cargar direcciones')
+    }
+  }, [session?.user?.id])
+
+  const addAddress = useCallback(async (addressData: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await fetch('/api/addresses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al crear la dirección')
+      }
+
+      await refreshAddresses()
+    } catch (err) {
+      console.error('Error adding address:', err)
+      throw err
+    }
+  }, [refreshAddresses])
+
+  const updateAddress = useCallback(async (id: string, addressData: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al actualizar la dirección')
+      }
+
+      await refreshAddresses()
+    } catch (err) {
+      console.error('Error updating address:', err)
+      throw err
+    }
+  }, [refreshAddresses])
+
+  const deleteAddress = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al eliminar la dirección')
+      }
+
+      await refreshAddresses()
+    } catch (err) {
+      console.error('Error deleting address:', err)
+      throw err
+    }
+  }, [refreshAddresses])
 
   useEffect(() => {
     async function fetchUserData() {
@@ -37,23 +142,16 @@ export function useUserData(): UserData {
       try {
         setLoading(true)
         
-        // TODO: Fetch real data from API
-        // const [statsRes, ordersRes, addressesRes] = await Promise.all([
-        //   fetch(`/api/users/${session.user.id}/stats`),
-        //   fetch(`/api/users/${session.user.id}/orders?limit=5`),
-        //   fetch(`/api/users/${session.user.id}/addresses`)
-        // ])
-
-        // For now, return mock data
-        await new Promise(resolve => setTimeout(resolve, 500)) // Simulate loading
+        // Fetch addresses
+        await refreshAddresses()
         
-        setStats({
+        // TODO: Fetch orders and stats
+        setStats(prev => ({
+          ...prev,
           totalOrders: 0,
-          totalSpent: 0,
-          totalAddresses: 0
-        })
+          totalSpent: 0
+        }))
         setRecentOrders([])
-        setAddresses([])
       } catch (err) {
         setError('Error al cargar datos del usuario')
         console.error('Error fetching user data:', err)
@@ -63,13 +161,17 @@ export function useUserData(): UserData {
     }
 
     fetchUserData()
-  }, [session?.user?.id])
+  }, [session?.user?.id, refreshAddresses])
 
   return {
     stats,
     recentOrders,
     addresses,
     loading,
-    error
+    error,
+    refreshAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress
   }
 }
