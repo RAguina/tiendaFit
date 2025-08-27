@@ -14,6 +14,11 @@ export default function SignInPage() {
   const router = useRouter()
 
   useEffect(() => {
+    console.log("🔧 NextAuth URLs:", {
+      NEXTAUTH_URL: process.env.NEXT_PUBLIC_NEXTAUTH_URL || 'not set',
+      currentOrigin: typeof window !== 'undefined' ? window.location.origin : 'server-side'
+    })
+    
     getSession().then(session => {
       console.log("🔍 Current session:", session)
       setDebugInfo({ 
@@ -24,20 +29,39 @@ export default function SignInPage() {
       if (session) {
         router.push("/")
       }
+    }).catch(error => {
+      console.error("❌ Error getting session:", error)
     })
   }, [router])
 
   const handleGoogleSignIn = async () => {
     console.log("🚀 Starting Google sign in...")
+    console.log("🔧 Current URL:", window.location.href)
+    console.log("🔧 Current origin:", window.location.origin)
     setLoading(true)
+    
     try {
       const result = await signIn("google", { 
         callbackUrl: "/",
         redirect: false
       })
       console.log("🎯 SignIn result:", result)
+      console.log("🎯 SignIn result type:", typeof result)
+      console.log("🎯 SignIn result keys:", result ? Object.keys(result) : 'null')
+      
+      // Wait a moment and check session again
+      setTimeout(async () => {
+        const newSession = await getSession()
+        console.log("🔄 Session after sign in:", newSession)
+      }, 1000)
+      
     } catch (error) {
       console.error("❌ SignIn error:", error)
+      console.error("❌ Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
     }
     setLoading(false)
   }
