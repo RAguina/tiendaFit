@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import AccountSidebar from "@/components/account/account-sidebar"
 import ProfileSection from "@/components/account/profile-section"
@@ -11,6 +11,7 @@ import AddressesSection from "@/components/account/addresses-section"
 export default function AccountPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeSection, setActiveSection] = useState('profile')
 
   useEffect(() => {
@@ -19,6 +20,13 @@ export default function AccountPage() {
       router.push("/auth/signin")
     }
   }, [session, status, router])
+
+  useEffect(() => {
+    const section = searchParams.get('section')
+    if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
+      setActiveSection(section)
+    }
+  }, [searchParams])
 
   if (status === "loading") {
     return (
