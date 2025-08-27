@@ -1,8 +1,5 @@
-export default function LoginPage() {
-  return (
-    <div>
-      <h1>Login</h1>
-      <p>Login page coming soon...</p>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/auth/signin");
 }
