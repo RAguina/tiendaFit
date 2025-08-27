@@ -15,8 +15,8 @@ export default function SignInPage() {
 
   useEffect(() => {
     console.log("🔧 NextAuth URLs:", {
-      NEXTAUTH_URL: process.env.NEXT_PUBLIC_NEXTAUTH_URL || 'not set',
-      currentOrigin: typeof window !== 'undefined' ? window.location.origin : 'server-side'
+      clientOrigin: typeof window !== 'undefined' ? window.location.origin : 'server-side',
+      note: 'NEXTAUTH_URL is server-side only, not visible in client'
     })
     
     getSession().then(session => {

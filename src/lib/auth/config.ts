@@ -3,6 +3,8 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
 
+console.log("🔧 Auth Config Loading - NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
+
 export const authOptions: NextAuthOptions = {
   debug: true,
   adapter: PrismaAdapter(db),
