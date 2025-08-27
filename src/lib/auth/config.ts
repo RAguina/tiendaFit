@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
