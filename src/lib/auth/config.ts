@@ -11,44 +11,13 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  debug: process.env.NODE_ENV === "development",
-  cookies: {
-    sessionToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-    callbackUrl: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-    csrfToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Host-" : ""}next-auth.csrf-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-  },
   callbacks: {
     signIn: async ({ user, account, profile }) => {
-      // Allow all signins
       return true
     },
-    jwt: async ({ token, user, account }) => {
+    jwt: async ({ token, user }) => {
       if (user) {
-        token.role = user.role
+        token.role = user.role || "USER"
       }
       return token
     },
@@ -59,17 +28,12 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    redirect: async ({ url, baseUrl }) => {
-      // Redirect to home page after successful login
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    },
   },
   pages: {
     signIn: '/auth/signin',
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 }
