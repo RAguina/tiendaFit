@@ -1,17 +1,16 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, Suspense } from "react"
 import AccountSidebar from "@/components/account/account-sidebar"
 import ProfileSection from "@/components/account/profile-section"
 import OrdersSection from "@/components/account/orders-section"
 import AddressesSection from "@/components/account/addresses-section"
 
-export default function AccountPage() {
+function AccountContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [activeSection, setActiveSection] = useState('profile')
 
   useEffect(() => {
@@ -22,11 +21,27 @@ export default function AccountPage() {
   }, [session, status, router])
 
   useEffect(() => {
-    const section = searchParams.get('section')
+    // Get section from URL hash instead of searchParams to avoid Suspense issues
+    const hash = window.location.hash.slice(1)
+    if (hash && ['profile', 'orders', 'addresses', 'settings'].includes(hash)) {
+      setActiveSection(hash)
+    }
+    
+    // Also check for query params for backward compatibility
+    const urlParams = new URLSearchParams(window.location.search)
+    const section = urlParams.get('section')
     if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
       setActiveSection(section)
     }
-  }, [searchParams])
+  }, [])
+
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section)
+    // Update URL without causing a page refresh
+    const url = new URL(window.location.href)
+    url.searchParams.set('section', section)
+    window.history.replaceState({}, '', url.toString())
+  }
 
   if (status === "loading") {
     return (
@@ -105,7 +120,7 @@ export default function AccountPage() {
           <div className="lg:col-span-1">
             <AccountSidebar 
               activeSection={activeSection}
-              onSectionChange={setActiveSection}
+              onSectionChange={handleSectionChange}
             />
           </div>
 
@@ -116,5 +131,20 @@ export default function AccountPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg text-gray-600">Cargando tu cuenta...</div>
+        </div>
+      </div>
+    }>
+      <AccountContent />
+    </Suspense>
   )
 }
