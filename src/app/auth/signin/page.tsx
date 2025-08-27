@@ -18,8 +18,8 @@ export default function SignInPage() {
       console.log("🔍 Current session:", session)
       setDebugInfo({ 
         hasSession: !!session,
-        userEmail: session?.user?.email,
-        userRole: session?.user?.role 
+        userEmail: session?.user?.email || undefined,
+        userRole: session?.user?.role || undefined 
       })
       if (session) {
         router.push("/")
