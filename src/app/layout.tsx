@@ -6,6 +6,7 @@ import { CartProvider } from '@/contexts/cart-context'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
 import ThemeScript from '@/components/theme-script'
+import SessionProviderWrapper from '@/components/providers/session-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,18 +23,20 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} bg-white dark:bg-gray-900`}>
-        <ThemeProvider>
-          <CartProvider>
-            <ThemeScript />
-            <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </CartProvider>
-        </ThemeProvider>
+        <SessionProviderWrapper>
+          <ThemeProvider>
+            <CartProvider>
+              <ThemeScript />
+              <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </CartProvider>
+          </ThemeProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   )
