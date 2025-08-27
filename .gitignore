@@ -28,6 +28,7 @@ next-env.d.ts
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -100,3 +101,7 @@ jspm_packages/
 
 # Prisma
 prisma/migrations/dev.db*
+
+# Build/Setup scripts (temporary)
+script-*.ps1
+setup-*.ps1
