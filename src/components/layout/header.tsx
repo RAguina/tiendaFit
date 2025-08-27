@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { useTheme } from '@/contexts/theme-context'
 import { useCart } from '@/contexts/cart-context'
+import { useSession, signOut } from 'next-auth/react'
 
 export default function Header() {
   const { theme, toggleTheme, isLoading } = useTheme()
   const { getTotalItems } = useCart()
+  const { data: session } = useSession()
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out">
@@ -48,6 +50,28 @@ export default function Header() {
                 <span className="inline-block w-5 h-5 text-center transition-all duration-300 ease-out">☀️</span>
               )}
             </button>
+
+            {/* Auth Buttons */}
+            {session ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-600 dark:text-gray-300 text-sm">
+                  {session.user?.name}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors duration-300 ease-out"
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth/signin"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition-colors duration-300 ease-out"
+              >
+                Iniciar Sesión
+              </Link>
+            )}
 
             {/* Cart Button */}
             <Link href="/cart" className="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-all duration-300 ease-out transform hover:scale-105 active:scale-95">
