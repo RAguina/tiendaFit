@@ -2,10 +2,10 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import Link from 'next/link'
 
-export default function PaymentPendingPage() {
+function PaymentPendingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -133,5 +133,20 @@ export default function PaymentPendingPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PaymentPendingPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+        <div className="max-w-4xl mx-auto px-4 text-center py-16">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600 dark:text-gray-400">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <PaymentPendingContent />
+    </Suspense>
   )
 }
