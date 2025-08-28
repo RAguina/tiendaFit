@@ -3,10 +3,12 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
 
-console.log("🔧 Auth Config Loading - NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
+if (process.env.NODE_ENV === 'development') {
+  console.log("🔧 Auth Config Loading")
+}
 
 export const authOptions: NextAuthOptions = {
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
   adapter: PrismaAdapter(db),
   providers: [
     GoogleProvider({
@@ -16,32 +18,33 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     signIn: async ({ user, account, profile }) => {
-      console.log("🔐 SignIn Callback:", { 
-        user: user?.email, 
-        account: account?.provider, 
-        profile: profile?.email 
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🔐 SignIn Callback:", { 
+          hasUser: !!user, 
+          provider: account?.provider
+        })
+      }
       return true
     },
     jwt: async ({ token, user, account }) => {
-      console.log("🎫 JWT Callback:", { 
-        hasToken: !!token, 
-        hasUser: !!user, 
-        userEmail: user?.email,
-        tokenSub: token?.sub 
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🎫 JWT Callback:", { 
+          hasToken: !!token, 
+          hasUser: !!user
+        })
+      }
       if (user) {
         token.role = user.role || "USER"
       }
       return token
     },
     session: async ({ session, token }) => {
-      console.log("👤 Session Callback:", { 
-        hasSession: !!session, 
-        hasToken: !!token,
-        userEmail: session?.user?.email,
-        tokenRole: token?.role 
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("👤 Session Callback:", { 
+          hasSession: !!session, 
+          hasToken: !!token
+        })
+      }
       if (session?.user && token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
@@ -49,7 +52,12 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     redirect: async ({ url, baseUrl }) => {
-      console.log("🔄 Redirect Callback:", { url, baseUrl })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🔄 Redirect Callback:", { 
+          urlType: url.startsWith("/") ? "relative" : "absolute",
+          sameOrigin: new URL(url).origin === baseUrl
+        })
+      }
       if (url.startsWith("/")) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl

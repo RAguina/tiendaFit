@@ -106,4 +106,3 @@ prisma/migrations/dev.db*
 script-*.ps1
 setup-*.ps1
 .env*.local
-.env.example
