@@ -14,30 +14,36 @@ export default function SignInPage() {
   const router = useRouter()
 
   useEffect(() => {
-    console.log("🔧 NextAuth URLs:", {
-      clientOrigin: typeof window !== 'undefined' ? window.location.origin : 'server-side',
-      note: 'NEXTAUTH_URL is server-side only, not visible in client'
-    })
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔧 NextAuth URLs:", {
+        clientOrigin: typeof window !== 'undefined' ? window.location.origin : 'server-side',
+        note: 'NEXTAUTH_URL is server-side only, not visible in client'
+      })
+    }
     
     getSession().then(session => {
-      console.log("🔍 Current session:", session)
-      setDebugInfo({ 
-        hasSession: !!session,
-        userEmail: session?.user?.email || undefined,
-        userRole: session?.user?.role || undefined 
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🔍 Current session:", { hasSession: !!session })
+        setDebugInfo({ 
+          hasSession: !!session,
+          userEmail: session?.user?.email || undefined,
+          userRole: session?.user?.role || undefined 
+        })
+      }
       if (session) {
         router.push("/")
       }
     }).catch(error => {
-      console.error("❌ Error getting session:", error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error("❌ Error getting session:", error)
+      }
     })
   }, [router])
 
   const handleGoogleSignIn = async () => {
-    console.log("🚀 Starting Google sign in...")
-    console.log("🔧 Current URL:", window.location.href)
-    console.log("🔧 Current origin:", window.location.origin)
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🚀 Starting Google sign in...")
+    }
     setLoading(true)
     
     try {
@@ -45,23 +51,19 @@ export default function SignInPage() {
         callbackUrl: "/",
         redirect: false
       })
-      console.log("🎯 SignIn result:", result)
-      console.log("🎯 SignIn result type:", typeof result)
-      console.log("🎯 SignIn result keys:", result ? Object.keys(result) : 'null')
       
-      // Wait a moment and check session again
-      setTimeout(async () => {
-        const newSession = await getSession()
-        console.log("🔄 Session after sign in:", newSession)
-      }, 1000)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🎯 SignIn result:", { hasResult: !!result })
+        
+        // Wait a moment and check session again
+        setTimeout(async () => {
+          const newSession = await getSession()
+          console.log("🔄 Session after sign in:", { hasSession: !!newSession })
+        }, 1000)
+      }
       
     } catch (error) {
-      console.error("❌ SignIn error:", error)
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        name: error instanceof Error ? error.name : typeof error
-      })
+      console.error("❌ SignIn error:", error instanceof Error ? error.message : 'Unknown error')
     }
     setLoading(false)
   }
@@ -100,7 +102,7 @@ export default function SignInPage() {
               </>
             )}
           </button>
-          {debugInfo && (
+          {process.env.NODE_ENV === 'development' && debugInfo && (
             <div className="mt-4 p-4 bg-gray-100 rounded-md text-xs">
               <strong>Debug Info:</strong>
               <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
