@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
     };
 
     if (category && category !== 'Todos') {
-      where.category = category;
+      where.category = {
+        name: category
+      };
     }
 
     if (search) {
@@ -46,7 +48,10 @@ export async function GET(request: NextRequest) {
         where,
         skip: offset,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        include: {
+          category: true
+        }
       }),
       db.product.count({ where })
     ]);
@@ -73,7 +78,7 @@ const createProductSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido'),
   description: z.string().min(1, 'Descripción es requerida'),
   price: z.number().positive('Precio debe ser positivo'),
-  category: z.string().min(1, 'Categoría es requerida'),
+  categoryId: z.string().min(1, 'ID de categoría es requerido'),
   image: z.string().url('URL de imagen inválida'),
   stock: z.number().int().nonnegative('Stock debe ser no negativo').default(0),
   isActive: z.boolean().default(true)
