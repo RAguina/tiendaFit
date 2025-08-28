@@ -15,7 +15,7 @@ const orderItemSchema = z.object({
 const createOrderSchema = z.object({
   addressId: z.string().min(1, "Dirección es requerida"),
   items: z.array(orderItemSchema).min(1, "Al menos un item es requerido"),
-  paymentMethod: z.enum(["stripe", "cash_on_delivery"], {
+  paymentMethod: z.enum(["mercadopago", "cash_on_delivery"], {
     errorMap: () => ({ message: "Método de pago inválido" })
   }),
   subtotal: z.number().positive("Subtotal debe ser positivo"),

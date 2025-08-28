@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
-  const [paymentMethod, setPaymentMethod] = useState<string>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<string>('mercadopago')
   const [loading, setLoading] = useState(false)
   const [loadingAddresses, setLoadingAddresses] = useState(true)
   
@@ -114,6 +114,36 @@ export default function CheckoutPage() {
 
       if (response.ok) {
         const order = await response.json()
+        
+        // If payment method is MercadoPago, create payment preference
+        if (paymentMethod === 'mercadopago') {
+          const paymentResponse = await fetch('/api/payments/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: order.id }),
+          })
+
+          if (paymentResponse.ok) {
+            const payment = await paymentResponse.json()
+            
+            // Redirect to MercadoPago checkout
+            const isProduction = process.env.NODE_ENV === 'production'
+            const checkoutUrl = isProduction ? payment.initPoint : payment.sandboxInitPoint
+            
+            // Clear cart before redirecting to payment
+            clearCart()
+            window.location.href = checkoutUrl
+            return
+          } else {
+            const paymentError = await paymentResponse.json()
+            alert(paymentError.error || 'Error al crear el pago')
+            return
+          }
+        }
+        
+        // For cash on delivery, go directly to confirmation
         clearCart()
         router.push(`/orders/${order.id}/confirmation`)
       } else {
@@ -228,8 +258,8 @@ export default function CheckoutPage() {
                     <input
                       type="radio"
                       name="payment"
-                      value="stripe"
-                      checked={paymentMethod === 'stripe'}
+                      value="mercadopago"
+                      checked={paymentMethod === 'mercadopago'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="mr-3"
                     />
@@ -238,7 +268,7 @@ export default function CheckoutPage() {
                         Tarjeta de Crédito/Débito
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Procesado de forma segura con Stripe
+                        Procesado de forma segura con MercadoPago
                       </div>
                     </div>
                   </label>

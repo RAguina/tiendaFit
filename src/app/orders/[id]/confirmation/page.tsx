@@ -146,8 +146,8 @@ export default function OrderConfirmationPage() {
 
   const getPaymentMethodText = (method: string) => {
     switch (method) {
-      case 'stripe':
-        return 'Tarjeta de Crédito/Débito'
+      case 'mercadopago':
+        return 'MercadoPago (Tarjeta/Efectivo/Transferencia)'
       case 'cash_on_delivery':
         return 'Pago Contra Entrega'
       default:
