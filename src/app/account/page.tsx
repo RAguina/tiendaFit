@@ -28,11 +28,11 @@ function AccountContent() {
       setActiveSection(hash)
     }
     
-    // Also check for query params for backward compatibility
+    // Also check for query params (both 'tab' and 'section' for backward compatibility)
     const urlParams = new URLSearchParams(window.location.search)
-    const section = urlParams.get('section')
-    if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
-      setActiveSection(section)
+    const tab = urlParams.get('tab') || urlParams.get('section')
+    if (tab && ['profile', 'orders', 'addresses', 'settings'].includes(tab)) {
+      setActiveSection(tab)
     }
   }, [])
 

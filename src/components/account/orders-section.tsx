@@ -1,17 +1,80 @@
 import { useUserData } from "@/hooks/use-user-data"
 import { useRouter } from "next/navigation"
-import { mockOrders, getStatusColor, getStatusText, formatDate } from "@/lib/mock-data"
+import { getStatusColor, getStatusText, formatDate } from "@/lib/mock-data"
 import { useCurrency } from "@/contexts/currency-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+
+interface OrderItem {
+  id: string
+  productId: string
+  quantity: number
+  price: number
+  product: {
+    name: string
+    image: string
+  }
+}
+
+interface Address {
+  id: string
+  firstName: string
+  lastName: string
+  company?: string
+  address1: string
+  address2?: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+  phone?: string
+}
+
+interface Order {
+  id: string
+  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED'
+  subtotal: number
+  tax: number
+  shipping: number
+  total: number
+  paymentMethod: string
+  paymentStatus: string
+  createdAt: string
+  items: OrderItem[]
+  address: Address
+}
 
 export default function OrdersSection() {
-  const { loading } = useUserData()
+  const { loading: userLoading } = useUserData()
   const { formatPrice } = useCurrency()
   const router = useRouter()
+  const { data: session } = useSession()
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
   
-  // Use mock orders for now
-  const recentOrders = mockOrders
+  // Fetch user orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!session) return
+
+      try {
+        const response = await fetch('/api/orders')
+        if (response.ok) {
+          const data = await response.json()
+          setOrders(data)
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [session])
+
+  const recentOrders = orders
 
   if (loading) {
     return (
@@ -72,26 +135,16 @@ export default function OrdersSection() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-medium text-gray-900">#{order.orderNumber}</h4>
+                      <h4 className="font-medium text-gray-900">#{order.id.slice(-8).toUpperCase()}</h4>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                         {getStatusText(order.status)}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600">Pedido realizado el {formatDate(order.createdAt)}</p>
                     <p className="text-sm text-gray-600 mt-1">{order.items.length} artículo{order.items.length > 1 ? 's' : ''}</p>
-                    {order.trackingNumber && (
-                      <p className="text-sm text-blue-600 mt-1">
-                        Seguimiento: {order.trackingNumber}
-                      </p>
-                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">{formatPrice(order.total)}</p>
-                    {order.estimatedDelivery && order.status !== 'DELIVERED' && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        Entrega estimada: {formatDate(order.estimatedDelivery)}
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -125,10 +178,11 @@ export default function OrdersSection() {
                       <div>
                         <h5 className="font-medium text-gray-900 mb-3">Dirección de Envío</h5>
                         <div className="text-sm text-gray-600">
-                          <p>{order.shippingAddress.name}</p>
-                          <p>{order.shippingAddress.address}</p>
-                          <p>{order.shippingAddress.city}, {order.shippingAddress.state}</p>
-                          <p>{order.shippingAddress.country}</p>
+                          <p>{order.address.firstName} {order.address.lastName}</p>
+                          <p>{order.address.address1}</p>
+                          {order.address.address2 && <p>{order.address.address2}</p>}
+                          <p>{order.address.city}, {order.address.state} {order.address.postalCode}</p>
+                          <p>{order.address.country}</p>
                         </div>
                       </div>
                     </div>
@@ -140,10 +194,10 @@ export default function OrdersSection() {
                         {order.items.map((item) => (
                           <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
                             <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                              {item.image ? (
+                              {item.product.image ? (
                                 <img 
-                                  src={item.image} 
-                                  alt={item.productName}
+                                  src={item.product.image} 
+                                  alt={item.product.name}
                                   className="w-full h-full object-cover rounded-lg"
                                 />
                               ) : (
@@ -151,7 +205,7 @@ export default function OrdersSection() {
                               )}
                             </div>
                             <div className="flex-1">
-                              <h6 className="font-medium text-gray-900">{item.productName}</h6>
+                              <h6 className="font-medium text-gray-900">{item.product.name}</h6>
                               <p className="text-sm text-gray-600">Cantidad: {item.quantity}</p>
                             </div>
                             <div className="text-right">
@@ -167,19 +221,15 @@ export default function OrdersSection() {
 
                     {/* Actions */}
                     <div className="mt-4 flex gap-2">
+                      <button 
+                        onClick={() => router.push(`/orders/${order.id}/confirmation`)}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Ver Detalles
+                      </button>
                       {order.status === 'DELIVERED' && (
                         <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                           Recomprar
-                        </button>
-                      )}
-                      {order.trackingNumber && (
-                        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                          Rastrear Envío
-                        </button>
-                      )}
-                      {order.status === 'PENDING' && (
-                        <button className="text-red-600 hover:text-red-700 text-sm font-medium">
-                          Cancelar Pedido
                         </button>
                       )}
                     </div>
