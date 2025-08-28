@@ -79,9 +79,12 @@ export default function CartPage() {
             <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white mb-4">
               <span>Total: ${getTotalPrice().toFixed(2)}</span>
             </div>
-            <button className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+            <Link 
+              href="/checkout"
+              className="block w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors text-center"
+            >
               Proceder al Checkout
-            </button>
+            </Link>
           </div>
         </div>
       </div>
