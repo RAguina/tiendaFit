@@ -7,6 +7,7 @@ import AccountSidebar from "@/components/account/account-sidebar"
 import ProfileSection from "@/components/account/profile-section"
 import OrdersSection from "@/components/account/orders-section"
 import AddressesSection from "@/components/account/addresses-section"
+import SettingsSection from "@/components/account/settings-section"
 
 function AccountContent() {
   const { data: session, status } = useSession()
@@ -67,23 +68,7 @@ function AccountContent() {
       case 'addresses':
         return <AddressesSection />
       case 'settings':
-        return (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Configuración
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="text-center py-8">
-                <div className="text-gray-400 text-4xl mb-4">⚙️</div>
-                <p className="text-gray-600">
-                  Esta sección estará disponible próximamente.
-                </p>
-              </div>
-            </div>
-          </div>
-        )
+        return <SettingsSection />
       default:
         return <ProfileSection />
     }
