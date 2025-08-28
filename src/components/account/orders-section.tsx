@@ -1,10 +1,12 @@
 import { useUserData } from "@/hooks/use-user-data"
 import { useRouter } from "next/navigation"
-import { mockOrders, getStatusColor, getStatusText, formatPrice, formatDate } from "@/lib/mock-data"
+import { mockOrders, getStatusColor, getStatusText, formatDate } from "@/lib/mock-data"
+import { useCurrency } from "@/contexts/currency-context"
 import { useState } from "react"
 
 export default function OrdersSection() {
   const { loading } = useUserData()
+  const { formatPrice } = useCurrency()
   const router = useRouter()
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null)
   

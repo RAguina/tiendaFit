@@ -1,9 +1,11 @@
 import { useSession } from "next-auth/react"
 import { useUserData } from "@/hooks/use-user-data"
+import { useCurrency } from "@/contexts/currency-context"
 
 export default function ProfileSection() {
   const { data: session } = useSession()
   const { stats, loading } = useUserData()
+  const { formatPrice } = useCurrency()
 
   if (loading) {
     return (
@@ -105,7 +107,7 @@ export default function ProfileSection() {
                 </div>
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-green-600">
-                    ${stats.totalSpent.toLocaleString()}
+                    {formatPrice(stats.totalSpent)}
                   </div>
                   <div className="text-sm text-green-800">Total Gastado</div>
                 </div>

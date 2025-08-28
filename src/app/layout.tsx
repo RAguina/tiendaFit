@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/theme-context'
 import { CartProvider } from '@/contexts/cart-context'
+import { CurrencyProvider } from '@/contexts/currency-context'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
 import ThemeScript from '@/components/theme-script'
@@ -25,16 +26,18 @@ export default function RootLayout({
       <body className={`${inter.className} bg-white dark:bg-gray-900`}>
         <SessionProviderWrapper>
           <ThemeProvider>
-            <CartProvider>
-              <ThemeScript />
-              <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </CartProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <ThemeScript />
+                <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
+                  <Header />
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
+              </CartProvider>
+            </CurrencyProvider>
           </ThemeProvider>
         </SessionProviderWrapper>
       </body>
