@@ -101,11 +101,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Prepare payer information
+    // Prepare payer information - use fake email to avoid MercadoPago wallet login
     const payer = {
       name: order.user.name?.split(' ')[0] || order.address.firstName,
       surname: order.user.name?.split(' ').slice(1).join(' ') || order.address.lastName,
-      email: order.user.email!,
+      email: `comprador+tf${order.id}@example.com`, // Fake email to avoid 2FA
       phone: order.address.phone ? {
         area_code: '11', // Default area code for Argentina
         number: order.address.phone.replace(/\D/g, '') // Remove non-digits
