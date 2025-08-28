@@ -26,8 +26,19 @@ export async function POST(request: NextRequest) {
         type: body.type,
         action: body.action,
         dataId: body.data?.id,
-        headers: { xSignature, xRequestId }
+        headers: { 
+          xSignature: xSignature?.substring(0, 20) + '...', // Don't log full signature
+          xRequestId 
+        }
       });
+    }
+
+    // Validate webhook signature before processing
+    if (body.type === 'payment' && body.data?.id) {
+      if (!validateWebhookSignature(xSignature, xRequestId, body.data.id)) {
+        console.error('❌ Invalid webhook signature - request rejected');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
     }
 
     // Handle different webhook types
@@ -57,11 +68,8 @@ async function handlePaymentNotification(
   xRequestId: string
 ) {
   try {
-    // Basic signature validation
-    if (!validateWebhookSignature(xSignature, xRequestId, paymentId)) {
-      console.error('❌ Invalid webhook signature');
-      return;
-    }
+    // Signature validation is already done in the main POST handler
+    // No need to validate again here
 
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Processing payment notification:', { paymentId });
