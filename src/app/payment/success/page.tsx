@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 
 interface Order {
@@ -18,7 +18,7 @@ interface Order {
   }>
 }
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -182,5 +182,20 @@ export default function PaymentSuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8">
+        <div className="max-w-4xl mx-auto px-4 text-center py-16">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600 dark:text-gray-400">Verificando el pago...</p>
+        </div>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   )
 }
