@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '@/contexts/theme-context'
 import { useCart } from '@/contexts/cart-context'
+import { useCurrency } from '@/contexts/currency-context'
 import { useSession, signOut } from 'next-auth/react'
 
 export default function Header() {
   const { theme, toggleTheme, isLoading } = useTheme()
   const { getTotalItems } = useCart()
+  const { currency, rates } = useCurrency()
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -50,6 +52,14 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
+            {/* Currency Indicator */}
+            <div className="hidden sm:flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <span className="font-medium">{currency}</span>
+              {rates && (
+                <div className="ml-1 w-2 h-2 bg-green-500 rounded-full" title="Tasas actualizadas"></div>
+              )}
+            </div>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}

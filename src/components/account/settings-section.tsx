@@ -2,9 +2,12 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
+import { useCurrency } from "@/contexts/currency-context"
+import { Currency, getCurrencyName } from "@/lib/currency"
 
 export default function SettingsSection() {
   const { data: session } = useSession()
+  const { currency, setCurrency, rates, loading: currencyLoading } = useCurrency()
   const [loading, setLoading] = useState(false)
   const [notifications, setNotifications] = useState({
     orderUpdates: true,
@@ -78,23 +81,39 @@ export default function SettingsSection() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">Idioma y Región</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Idioma
                 </label>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="es">Español</option>
                   <option value="en">English</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Moneda
                 </label>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="ARS">Peso Argentino (ARS)</option>
-                  <option value="USD">Dólar Estadounidense (USD)</option>
-                  <option value="EUR">Euro (EUR)</option>
-                </select>
+                <div className="relative">
+                  <select 
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value as Currency)}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="ARS">Peso Argentino (ARS)</option>
+                    <option value="USD">Dólar Estadounidense (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                  </select>
+                  {currencyLoading && (
+                    <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    </div>
+                  )}
+                </div>
+                {rates && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Tasas actualizadas: {new Date(rates.last_updated).toLocaleString('es-ES')}
+                  </p>
+                )}
               </div>
             </div>
           </div>

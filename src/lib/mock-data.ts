@@ -194,11 +194,29 @@ export const getStatusText = (status: Order['status']) => {
   return statusTexts[status] || statusTexts.PENDING
 }
 
-export const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS'
-  }).format(price)
+export const formatPrice = (price: number, currency: 'ARS' | 'USD' | 'EUR' = 'ARS') => {
+  const formatters = {
+    ARS: new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }),
+    USD: new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }),
+    EUR: new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+  
+  return formatters[currency].format(price)
 }
 
 export const formatDate = (dateString: string) => {
