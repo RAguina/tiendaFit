@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sanitizeUserInput, validateAndSanitize, VALIDATION_PATTERNS } from '@/lib/sanitize'
 
 export const loginSchema = z.object({
   email: z
@@ -116,27 +117,39 @@ export const addressSchema = z.object({
   name: z
     .string()
     .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
+    .max(100, 'Name must be less than 100 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.name.test(val), 'Invalid name format'),
   street: z
     .string()
     .min(1, 'Street address is required')
-    .max(200, 'Street address must be less than 200 characters'),
+    .max(200, 'Street address must be less than 200 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.address.test(val), 'Invalid street address format'),
   city: z
     .string()
     .min(1, 'City is required')
-    .max(100, 'City must be less than 100 characters'),
+    .max(100, 'City must be less than 100 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.city.test(val), 'Invalid city format'),
   state: z
     .string()
     .min(1, 'State is required')
-    .max(100, 'State must be less than 100 characters'),
+    .max(100, 'State must be less than 100 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.city.test(val), 'Invalid state format'),
   zipCode: z
     .string()
     .min(1, 'Zip code is required')
-    .max(20, 'Zip code must be less than 20 characters'),
+    .max(20, 'Zip code must be less than 20 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.postalCode.test(val), 'Invalid zip code format'),
   country: z
     .string()
     .min(1, 'Country is required')
-    .max(100, 'Country must be less than 100 characters'),
+    .max(100, 'Country must be less than 100 characters')
+    .transform(val => sanitizeUserInput(val))
+    .refine(val => VALIDATION_PATTERNS.city.test(val), 'Invalid country format'),
   isDefault: z.boolean().optional().default(false),
 })
 

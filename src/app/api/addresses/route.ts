@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth/config"
 import { db } from "@/lib/db"
 import { z } from "zod"
+import { apiRateLimit, getClientIdentifier } from "@/lib/rate-limit"
 
 const createAddressSchema = z.object({
   firstName: z.string().min(1, "El nombre es requerido"),
@@ -19,8 +20,24 @@ const createAddressSchema = z.object({
 })
 
 // GET - Obtener direcciones del usuario
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = apiRateLimit(clientId)
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
+          }
+        }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
@@ -50,6 +67,22 @@ export async function GET() {
 // POST - Crear nueva dirección
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting for creation (more restrictive)
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = apiRateLimit(clientId)
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
+          }
+        }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
