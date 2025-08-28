@@ -145,13 +145,16 @@ export function useUserData(): UserData {
         // Fetch addresses
         await refreshAddresses()
         
-        // TODO: Fetch orders and stats
+        // TODO: Fetch real orders from API, using mock data for now
+        const { mockOrders } = await import('@/lib/mock-data')
+        const totalSpent = mockOrders.reduce((sum, order) => sum + order.total, 0)
+        
         setStats(prev => ({
           ...prev,
-          totalOrders: 0,
-          totalSpent: 0
+          totalOrders: mockOrders.length,
+          totalSpent: totalSpent
         }))
-        setRecentOrders([])
+        setRecentOrders(mockOrders)
       } catch (err) {
         setError('Error al cargar datos del usuario')
         console.error('Error fetching user data:', err)
