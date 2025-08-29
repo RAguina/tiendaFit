@@ -38,3 +38,60 @@
                 box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
+
+@layer components {
+  /* Enhanced button animations */
+  .cart-button {
+    @apply transform transition-all duration-300 ease-in-out;
+  }
+  
+  .cart-button:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+  
+  .cart-button:active {
+    @apply scale-95;
+  }
+  
+  /* Success animation keyframes */
+  @keyframes cart-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .cart-success {
+    animation: cart-success 0.6s ease-in-out;
+  }
+  
+  /* Loading pulse animation */
+  @keyframes cart-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  .cart-loading {
+    animation: cart-pulse 1.5s ease-in-out infinite;
+  }
+  
+  /* Bounce effect for success state */
+  @keyframes cart-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  
+  .cart-bounce {
+    animation: cart-bounce 0.8s ease-in-out 2;
+  }
+  
+  /* Shake animation for errors */
+  @keyframes cart-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  
+  .cart-error {
+    animation: cart-shake 0.5s ease-in-out;
+  }
+}
