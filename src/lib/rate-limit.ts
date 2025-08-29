@@ -1,11 +1,12 @@
-// Simple rate limiting implementation
+// Rate limiting implementation with Redis support
+import { getRateLimiter, RATE_LIMIT_CONFIGS } from './security/redis-rate-limit'
 
 interface RateLimitEntry {
   count: number
   resetTime: number
 }
 
-// In-memory store (for production, use Redis or similar)
+// In-memory store (fallback when Redis is not available)
 const rateLimitStore = new Map<string, RateLimitEntry>()
 
 export interface RateLimitOptions {
@@ -78,8 +79,47 @@ function cleanupExpiredEntries(now: number) {
   keysToDelete.forEach(key => rateLimitStore.delete(key))
 }
 
-// Pre-configured rate limiters for different endpoints
-export const authRateLimit = createRateLimit({
+// Enhanced rate limiters with Redis support
+export async function enhancedAuthRateLimit(identifier: string) {
+  try {
+    const rateLimiter = getRateLimiter()
+    const result = await rateLimiter.checkRateLimit(identifier, RATE_LIMIT_CONFIGS.AUTH)
+    
+    return {
+      success: result.success,
+      message: result.success ? undefined : "Too many authentication attempts, please try again in 15 minutes",
+      retryAfter: result.retryAfter,
+      limit: result.limit,
+      remaining: result.remaining,
+      resetTime: result.resetTime
+    }
+  } catch (error) {
+    console.warn('Redis auth rate limiting failed, using fallback:', error)
+    return legacyAuthRateLimit(identifier)
+  }
+}
+
+export async function enhancedPaymentRateLimit(identifier: string) {
+  try {
+    const rateLimiter = getRateLimiter()
+    const result = await rateLimiter.checkRateLimit(identifier, RATE_LIMIT_CONFIGS.PAYMENT)
+    
+    return {
+      success: result.success,
+      message: result.success ? undefined : "Too many payment attempts, please try again later",
+      retryAfter: result.retryAfter,
+      limit: result.limit,
+      remaining: result.remaining,
+      resetTime: result.resetTime
+    }
+  } catch (error) {
+    console.warn('Redis payment rate limiting failed, using fallback:', error)
+    return strictApiRateLimit(identifier)
+  }
+}
+
+// Legacy rate limiters for backward compatibility
+export const legacyAuthRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   maxRequests: 5, // 5 login attempts per 15 minutes
   message: 'Too many authentication attempts, please try again in 15 minutes'
@@ -96,6 +136,9 @@ export const strictApiRateLimit = createRateLimit({
   maxRequests: 10, // 10 requests per minute for sensitive operations
   message: 'Rate limit exceeded for this operation, please wait a moment'
 })
+
+// For backward compatibility, keep the old name
+export const authRateLimit = legacyAuthRateLimit
 
 // Helper to get client identifier (IP address)
 export function getClientIdentifier(request: Request): string {

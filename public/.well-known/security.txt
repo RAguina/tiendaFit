@@ -1,0 +1,52 @@
+Contact: security@tiendafit.com
+Contact: https://github.com/RAguina/tiendaFit/security/advisories/new
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://keys.openpgp.org/search?q=security@tiendafit.com
+Preferred-Languages: es, en
+Canonical: https://tiendafit.com/.well-known/security.txt
+Policy: https://tiendafit.com/security-policy
+Acknowledgments: https://tiendafit.com/security-acknowledgments
+
+# Security Policy for TiendaFit E-commerce Platform
+#
+# We take the security of our platform seriously and appreciate
+# responsible disclosure of security vulnerabilities.
+#
+# SCOPE:
+# - Main application: https://tiendafit.com
+# - API endpoints: https://tiendafit.com/api/*
+# - Payment processing flows
+# - User authentication and authorization
+# - Data handling and privacy
+#
+# OUT OF SCOPE:
+# - Third-party services (MercadoPago, Google Fonts, etc.)
+# - Social engineering attacks
+# - Physical security
+# - Denial of Service (DoS) attacks
+# - Spam or content issues
+#
+# REPORTING GUIDELINES:
+# 1. Send detailed reports to security@tiendafit.com
+# 2. Include steps to reproduce the vulnerability
+# 3. Provide proof of concept when applicable
+# 4. Allow reasonable time for investigation and fix
+# 5. Avoid accessing user data or causing service disruption
+#
+# RESPONSE TIMELINE:
+# - Initial acknowledgment: Within 48 hours
+# - Vulnerability assessment: Within 1 week
+# - Status updates: Weekly for ongoing issues
+# - Resolution target: 30 days for critical issues
+#
+# SAFE HARBOR:
+# We will not pursue legal action against security researchers
+# who follow responsible disclosure practices and act in good faith.
+#
+# REWARDS:
+# We may provide recognition for valid security reports that help
+# improve our platform security. Public acknowledgment is provided
+# with researcher consent.
+#
+# Last updated: 2025-01-27
+# Version: 1.0
