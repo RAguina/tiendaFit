@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { withAuth } from "next-auth/middleware"
+import { generateNonce } from "@/lib/security/nonce"
 
-function applySecurityHeaders(response: NextResponse) {
+function applySecurityHeaders(response: NextResponse, nonce?: string) {
   // Security headers
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('X-Frame-Options', 'DENY')
@@ -14,18 +15,21 @@ function applySecurityHeaders(response: NextResponse) {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   }
   
-  // Content Security Policy
+  // Content Security Policy - Restrictive with nonce support
+  const nonceDirective = nonce ? `'nonce-${nonce}'` : "";
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    `script-src 'self' ${nonceDirective} https://vercel.live https://*.vercel.com`,
+    `style-src 'self' ${nonceDirective} https://fonts.googleapis.com`,
+    "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://api.exchangerate-api.com https://*.vercel.app",
+    "connect-src 'self' https://api.exchangerate-api.com https://*.vercel.app https://www.mercadopago.com https://api.mercadopago.com",
+    "object-src 'none'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
-  ].join('; ')
+    "form-action 'self'",
+    "upgrade-insecure-requests"
+  ].filter(directive => directive.trim()).join('; ')
   
   response.headers.set('Content-Security-Policy', csp)
 }
@@ -51,8 +55,12 @@ export default withAuth(
     
     const response = NextResponse.next()
     
+    // Generate nonce for CSP
+    const nonce = generateNonce()
+    response.headers.set('x-nonce', nonce)
+    
     // Apply security headers to all responses
-    applySecurityHeaders(response)
+    applySecurityHeaders(response, nonce)
     
     // Admin protection
     if (req.nextUrl.pathname.startsWith("/admin") && 
