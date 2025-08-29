@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useCart } from '@/contexts/cart-context'
 
 interface Order {
   id: string
@@ -22,8 +23,10 @@ function PaymentSuccessContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, status } = useSession()
+  const { clearCart } = useCart()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [cartCleared, setCartCleared] = useState(false)
   
   const orderId = searchParams?.get('order_id')
   const paymentId = searchParams?.get('payment_id')
@@ -38,7 +41,7 @@ function PaymentSuccessContent() {
     }
   }, [session, status, router])
 
-  // Fetch order details
+  // Fetch order details and clear cart if payment successful
   useEffect(() => {
     const fetchOrder = async () => {
       if (!session || !orderId) {
@@ -51,6 +54,21 @@ function PaymentSuccessContent() {
         if (response.ok) {
           const data = await response.json()
           setOrder(data)
+          
+          // Clear cart only if payment is successful and cart hasn't been cleared yet
+          if (!cartCleared && data.paymentStatus === 'PAID') {
+            try {
+              await clearCart()
+              setCartCleared(true)
+              
+              // Clear any pending order from session storage
+              if (typeof window !== 'undefined') {
+                sessionStorage.removeItem('pendingOrderId')
+              }
+            } catch (error) {
+              console.error('Error clearing cart:', error)
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching order:', error)
@@ -60,7 +78,7 @@ function PaymentSuccessContent() {
     }
 
     fetchOrder()
-  }, [session, orderId])
+  }, [session, orderId, clearCart, cartCleared])
 
   if (status === 'loading' || loading) {
     return (

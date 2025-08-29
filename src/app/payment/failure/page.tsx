@@ -48,7 +48,8 @@ function PaymentFailureContent() {
               No se pudo procesar tu pago
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Tu orden está pendiente y puedes intentar pagarla nuevamente o contactar con soporte.
+              El pago fue cancelado o no se completó correctamente. 
+              No te preocupes, tu carrito se mantiene guardado para que puedas intentar nuevamente.
             </p>
           </div>
 
@@ -81,6 +82,21 @@ function PaymentFailureContent() {
             </div>
           </div>
 
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="text-blue-500 mr-3 text-xl">🛒</div>
+              <div>
+                <h4 className="text-blue-900 dark:text-blue-100 font-medium mb-1">
+                  Tu carrito está seguro
+                </h4>
+                <p className="text-blue-800 dark:text-blue-200 text-sm">
+                  Todos los productos que seleccionaste siguen en tu carrito. 
+                  Puedes continuar desde donde lo dejaste.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {orderId && (
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Número de Orden:</p>
@@ -92,10 +108,10 @@ function PaymentFailureContent() {
 
           <div className="space-y-4">
             <Link 
-              href={orderId ? `/orders/${orderId}/confirmation` : '/account?tab=orders'}
+              href="/checkout"
               className="block w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
             >
-              {orderId ? 'Ver Detalles y Reintentar Pago' : 'Ver Mis Órdenes'}
+              🔄 Intentar Pago Nuevamente
             </Link>
             
             <div className="flex gap-4">
@@ -103,13 +119,13 @@ function PaymentFailureContent() {
                 href="/cart"
                 className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-center py-3 px-4 rounded-lg font-semibold transition-colors"
               >
-                Volver al Carrito
+                🛒 Ver Carrito
               </Link>
               <Link 
                 href="/products"
                 className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-center py-3 px-4 rounded-lg font-semibold transition-colors"
               >
-                Continuar Comprando
+                🛍️ Seguir Comprando
               </Link>
             </div>
           </div>

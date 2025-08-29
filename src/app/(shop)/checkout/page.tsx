@@ -132,8 +132,12 @@ export default function CheckoutPage() {
             const isProduction = process.env.NODE_ENV === 'production'
             const checkoutUrl = isProduction ? payment.initPoint : payment.sandboxInitPoint
             
-            // Clear cart before redirecting to payment
-            clearCart()
+            // DON'T clear cart here - only after successful payment confirmation
+            // Store order ID in session/localStorage for later cleanup if needed
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pendingOrderId', order.id)
+            }
+            
             window.location.href = checkoutUrl
             return
           } else {
