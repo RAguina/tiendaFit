@@ -135,6 +135,11 @@ export function useUserData(): UserData {
   useEffect(() => {
     async function fetchUserData() {
       if (!session?.user?.id) {
+        // Reset all user data when session is null (logout)
+        setStats({ totalOrders: 0, totalSpent: 0, totalAddresses: 0 })
+        setRecentOrders([])
+        setAddresses([])
+        setError(null)
         setLoading(false)
         return
       }
