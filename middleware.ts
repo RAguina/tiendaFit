@@ -1,18 +1,56 @@
 import { NextRequest, NextResponse } from "next/server"
 import { withAuth } from "next-auth/middleware"
 import { generateNonce } from "@/lib/security/nonce"
+import { EXPECT_CT_CONFIG } from "@/lib/security/certificate-pinning"
 
 function applySecurityHeaders(response: NextResponse, nonce?: string) {
-  // Security headers
+  // Core Security Headers
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  
+  // Enhanced Permissions Policy
+  response.headers.set('Permissions-Policy', [
+    'camera=()', 
+    'microphone=()', 
+    'geolocation=()',
+    'payment=(self)',
+    'usb=()', 
+    'magnetometer=()', 
+    'accelerometer=()', 
+    'gyroscope=()',
+    'clipboard-read=(self)',
+    'clipboard-write=(self)'
+  ].join(', '))
+  
+  // Cross-Origin Policies
+  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+  response.headers.set('Cross-Origin-Resource-Policy', 'same-site')
+  
+  // Additional Security Headers
+  response.headers.set('X-Permitted-Cross-Domain-Policies', 'none')
+  response.headers.set('X-DNS-Prefetch-Control', 'off')
+  
+  // Remove Server Information
+  response.headers.set('Server', 'TiendaFit')
+  response.headers.delete('X-Powered-By')
   
   // HTTPS-only headers (only in production)
   if (process.env.NODE_ENV === 'production') {
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+    
+    // Certificate Transparency compliance
+    if (EXPECT_CT_CONFIG.enabled) {
+      const expectCTValue = [
+        `max-age=${EXPECT_CT_CONFIG.maxAge}`,
+        EXPECT_CT_CONFIG.enforce ? 'enforce' : '',
+        EXPECT_CT_CONFIG.reportUri ? `report-uri="${EXPECT_CT_CONFIG.reportUri}"` : ''
+      ].filter(Boolean).join(', ')
+      
+      response.headers.set('Expect-CT', expectCTValue)
+    }
   }
   
   // Content Security Policy - Restrictive with nonce support
