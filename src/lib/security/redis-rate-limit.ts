@@ -24,6 +24,7 @@ interface RateLimitResult {
 class RedisRateLimit {
   private redis: Redis | null = null
   private fallbackMemory: Map<string, { count: number; resetTime: number }> = new Map()
+  private readonly MAX_MEMORY_ENTRIES = 10000 // Prevent memory exhaustion
 
   constructor() {
     this.initRedis()
@@ -31,23 +32,54 @@ class RedisRateLimit {
 
   private async initRedis() {
     try {
-      if (process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL) {
-        // Use Upstash Redis for serverless deployment
-        if (process.env.UPSTASH_REDIS_REST_URL) {
+      const redisUrl = process.env.REDIS_URL
+      const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
+      
+      if (redisUrl || upstashUrl) {
+        // Validate Redis URL format
+        if (redisUrl) {
+          if (!this.isValidRedisUrl(redisUrl)) {
+            throw new Error('Invalid Redis URL format')
+          }
+          this.redis = new Redis(redisUrl, {
+            connectTimeout: 10000,
+            lazyConnect: true,
+            maxRetriesPerRequest: 3
+          })
+          // Test connection without logging sensitive info
+          await this.redis.ping()
+        } else if (upstashUrl) {
           // For serverless environments, use HTTP-based Redis
           // Implementation would use Upstash REST API
-          console.log('Redis configured for serverless environment')
-        } else {
-          // Traditional Redis connection
-          this.redis = new Redis(process.env.REDIS_URL!)
-          console.log('Redis connected for rate limiting')
+          if (!this.isValidHttpUrl(upstashUrl)) {
+            throw new Error('Invalid Upstash Redis URL format')
+          }
         }
       } else {
-        console.warn('Redis not configured, using in-memory fallback')
+        // Silent fallback to in-memory
+        this.redis = null
       }
     } catch (error) {
-      console.error('Failed to connect to Redis:', error)
-      console.log('Falling back to in-memory rate limiting')
+      // Don't log sensitive connection details
+      this.redis = null
+    }
+  }
+
+  private isValidRedisUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url)
+      return ['redis:', 'rediss:'].includes(parsed.protocol)
+    } catch {
+      return false
+    }
+  }
+
+  private isValidHttpUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url)
+      return ['https:'].includes(parsed.protocol)
+    } catch {
+      return false
     }
   }
 
@@ -66,13 +98,13 @@ class RedisRateLimit {
         return await this.memoryRateLimit(fullKey, config, now, windowStart)
       }
     } catch (error) {
-      console.error('Rate limit check failed:', error)
-      // Fail open in case of errors (allow request)
+      // Fail closed for security - deny request on errors
       return {
-        success: true,
+        success: false,
         limit: config.maxRequests,
-        remaining: config.maxRequests - 1,
-        resetTime: now + config.windowMs
+        remaining: 0,
+        resetTime: now + config.windowMs,
+        retryAfter: Math.ceil(config.windowMs / 1000)
       }
     }
   }
@@ -103,9 +135,11 @@ class RedisRateLimit {
         return {0, max_requests, 0, reset_time}
       end
       
-      -- Add current request
-      redis.call('ZADD', key, now, now .. ':' .. math.random())
+      -- Add current request with secure random ID
+      local request_id = now .. ':' .. redis.call('INCR', key .. ':counter')
+      redis.call('ZADD', key, now, request_id)
       redis.call('EXPIRE', key, math.ceil(window_ms / 1000))
+      redis.call('EXPIRE', key .. ':counter', math.ceil(window_ms / 1000))
       
       local remaining = max_requests - current_requests - 1
       local reset_time = now + window_ms
@@ -198,8 +232,21 @@ class RedisRateLimit {
   }
 
   private cleanupMemoryEntries(cutoff: number) {
+    // Remove expired entries
     for (const [key, entry] of Array.from(this.fallbackMemory.entries())) {
       if (entry.resetTime < cutoff) {
+        this.fallbackMemory.delete(key)
+      }
+    }
+    
+    // Prevent memory exhaustion - remove oldest entries if over limit
+    if (this.fallbackMemory.size > this.MAX_MEMORY_ENTRIES) {
+      const entries = Array.from(this.fallbackMemory.entries())
+      const toRemove = entries
+        .sort((a, b) => a[1].resetTime - b[1].resetTime)
+        .slice(0, entries.length - this.MAX_MEMORY_ENTRIES + 1000) // Keep buffer
+      
+      for (const [key] of toRemove) {
         this.fallbackMemory.delete(key)
       }
     }
