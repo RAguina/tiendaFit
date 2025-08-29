@@ -13,7 +13,15 @@ function AccountContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [activeSection, setActiveSection] = useState('profile')
+  
+  // Derive state from URL - no useState needed
+  const activeSection = (() => {
+    const section = searchParams.get('section')
+    if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
+      return section
+    }
+    return 'profile'
+  })()
 
   useEffect(() => {
     if (status === "loading") return
@@ -22,22 +30,11 @@ function AccountContent() {
     }
   }, [session, status, router])
 
-  // Update active section based on URL params
-  useEffect(() => {
-    const section = searchParams.get('section')
-    if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
-      setActiveSection(section)
-    } else {
-      setActiveSection('profile')
-    }
-  }, [searchParams])
-
   const handleSectionChange = (section: string) => {
-    setActiveSection(section)
-    // Update URL without causing a page refresh
-    const url = new URL(window.location.href)
-    url.searchParams.set('section', section)
-    window.history.replaceState({}, '', url.toString())
+    // Update URL using Next.js router - this will trigger re-render automatically
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('section', section)
+    router.replace(`/account?${params.toString()}`)
   }
 
   if (status === "loading") {
