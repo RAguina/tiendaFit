@@ -124,10 +124,10 @@ export function validateWebhookSignature(
       return false;
     }
 
-    // In development, skip signature validation for testing
+    // In development, validate signature but log detailed info for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.log('⚠️ Development mode: Skipping signature validation');
-      return true;
+      console.log('🔧 Development mode: Validating signature with debug info');
+      // Continue with validation but with extra logging
     }
 
     // Get secret from environment variables
