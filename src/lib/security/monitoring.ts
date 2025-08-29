@@ -31,6 +31,10 @@ export type SecurityEventType =
 
 class SecurityMonitor {
   private events: SecurityEvent[] = []
+  private readonly MAX_EVENTS = 5000 // Prevent memory exhaustion
+  private readonly CLEANUP_INTERVAL = 60 * 60 * 1000 // Cleanup every hour
+  private lastCleanup = Date.now()
+  
   private alertThresholds = {
     FAILED_LOGIN: { count: 5, window: 15 * 60 * 1000 }, // 5 failures in 15 minutes
     RATE_LIMIT_EXCEEDED: { count: 10, window: 60 * 1000 }, // 10 rate limits in 1 minute
@@ -61,10 +65,8 @@ class SecurityMonitor {
     // Check for alert conditions
     this.checkAlertThresholds(fullEvent)
 
-    // Cleanup old events (keep last 1000 events)
-    if (this.events.length > 1000) {
-      this.events = this.events.slice(-1000)
-    }
+    // Proactive memory management
+    this.cleanupEvents()
   }
 
   /**
@@ -148,6 +150,31 @@ class SecurityMonitor {
       console.log(`[PRODUCTION ALERT] Critical event detected, considering automatic response`)
       // Implementation might temporarily block IP, revoke sessions, etc.
     }
+  }
+
+  /**
+   * Clean up old events to prevent memory exhaustion
+   */
+  private cleanupEvents(): void {
+    const now = Date.now()
+    
+    // Only cleanup if interval has passed
+    if (now - this.lastCleanup < this.CLEANUP_INTERVAL && this.events.length < this.MAX_EVENTS) {
+      return
+    }
+    
+    // Remove events older than 24 hours
+    const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000)
+    this.events = this.events.filter(event => event.timestamp >= oneDayAgo)
+    
+    // If still too many events, keep only the most recent ones
+    if (this.events.length > this.MAX_EVENTS) {
+      this.events = this.events
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, this.MAX_EVENTS)
+    }
+    
+    this.lastCleanup = now
   }
 
   /**
