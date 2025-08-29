@@ -25,6 +25,8 @@ export const authOptions: NextAuthOptions = {
       }
       return true
     },
+    // Note: signOut callback is not available in NextAuth v4
+    // Session invalidation is handled automatically by NextAuth
     jwt: async ({ token, user, account }) => {
       if (process.env.NODE_ENV === 'development') {
         console.log("🎫 JWT Callback:", { 

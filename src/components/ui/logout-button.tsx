@@ -3,6 +3,7 @@
 import { signOut } from 'next-auth/react'
 import { useCart } from '@/contexts/cart-context'
 import { useState } from 'react'
+import { forceLogoutCleanup, debugCookies } from '@/hooks/use-debug-session'
 
 interface LogoutButtonProps {
   children: React.ReactNode
@@ -22,26 +23,74 @@ export default function LogoutButton({
     if (isLoading) return
 
     setIsLoading(true)
+    
     try {
-      // Clear cart before signing out (user-specific cart)
-      await clearCart()
+      // Debug: Show cookies before logout
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🍪 Cookies before logout:', debugCookies())
+      }
+      
+      // Clear cart before signing out (user-specific cart)  
+      try {
+        await clearCart()
+      } catch (cartError) {
+        console.warn('Error clearing cart during logout:', cartError)
+      }
       
       // Call optional callback
       onLogout?.()
       
-      // Sign out with redirect to home page
-      await signOut({ 
-        callbackUrl: '/',
-        redirect: true 
-      })
+      // Use our aggressive cleanup function
+      forceLogoutCleanup()
+      
+      // Sign out with NextAuth API call directly
+      try {
+        const response = await fetch('/api/auth/signout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            csrfToken: await fetch('/api/auth/csrf')
+              .then(res => res.json())
+              .then(data => data.csrfToken)
+          })
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to sign out via API')
+        }
+      } catch (apiError) {
+        console.warn('API signout failed, trying NextAuth signOut:', apiError)
+        
+        // Fallback to NextAuth signOut
+        await signOut({ 
+          callbackUrl: '/',
+          redirect: false 
+        })
+      }
+      
+      // Final cleanup after signout
+      forceLogoutCleanup()
+      
+      // Debug: Show cookies after logout
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🍪 Cookies after logout:', debugCookies())
+      }
+      
+      // Wait a moment for cleanup to complete, then redirect
+      setTimeout(() => {
+        window.location.replace('/')
+      }, 100)
+      
     } catch (error) {
       console.error('Error during logout:', error)
       
-      // Force redirect as fallback
-      window.location.href = '/'
-    } finally {
-      setIsLoading(false)
+      // Ultimate fallback: force cleanup and redirect
+      forceLogoutCleanup()
+      window.location.replace('/')
     }
+    // Don't set loading to false since we're redirecting anyway
   }
 
   return (
