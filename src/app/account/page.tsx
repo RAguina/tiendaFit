@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
 import AccountSidebar from "@/components/account/account-sidebar"
 import ProfileSection from "@/components/account/profile-section"
@@ -12,6 +12,7 @@ import SettingsSection from "@/components/account/settings-section"
 function AccountContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeSection, setActiveSection] = useState('profile')
 
   useEffect(() => {
@@ -21,20 +22,15 @@ function AccountContent() {
     }
   }, [session, status, router])
 
+  // Update active section based on URL params
   useEffect(() => {
-    // Get section from URL hash instead of searchParams to avoid Suspense issues
-    const hash = window.location.hash.slice(1)
-    if (hash && ['profile', 'orders', 'addresses', 'settings'].includes(hash)) {
-      setActiveSection(hash)
+    const section = searchParams.get('section')
+    if (section && ['profile', 'orders', 'addresses', 'settings'].includes(section)) {
+      setActiveSection(section)
+    } else {
+      setActiveSection('profile')
     }
-    
-    // Also check for query params (both 'tab' and 'section' for backward compatibility)
-    const urlParams = new URLSearchParams(window.location.search)
-    const tab = urlParams.get('tab') || urlParams.get('section')
-    if (tab && ['profile', 'orders', 'addresses', 'settings'].includes(tab)) {
-      setActiveSection(tab)
-    }
-  }, [])
+  }, [searchParams])
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section)
