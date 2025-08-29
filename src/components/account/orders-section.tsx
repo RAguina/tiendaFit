@@ -56,7 +56,12 @@ export default function OrdersSection() {
   // Fetch user orders
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!session) return
+      if (!session) {
+        // Clear orders when no session (logout)
+        setOrders([])
+        setLoading(false)
+        return
+      }
 
       try {
         const response = await fetch('/api/orders')

@@ -3,7 +3,6 @@
 import { signOut } from 'next-auth/react'
 import { useCart } from '@/contexts/cart-context'
 import { useState } from 'react'
-import { forceLogoutCleanup, debugCookies } from '@/hooks/use-debug-session'
 
 interface LogoutButtonProps {
   children: React.ReactNode
@@ -21,53 +20,19 @@ export default function LogoutButton({
 
   const handleLogout = async () => {
     if (isLoading) return
-
-    console.log('🔴 LOGOUT STARTED - Simplified approach')
     setIsLoading(true)
     
     try {
-      // Clear cart before signing out (user-specific cart)  
-      console.log('🔴 LOGOUT Step 1: Clearing cart')
-      try {
-        await clearCart()
-        console.log('🔴 LOGOUT Step 1.1: Cart cleared successfully')
-      } catch (cartError) {
-        console.warn('🔴 LOGOUT Step 1.2: Error clearing cart during logout:', cartError)
-      }
-      
-      // Call optional callback
-      console.log('🔴 LOGOUT Step 2: Calling optional callback')
+      await clearCart()
       onLogout?.()
-      
-      // Clear only non-httpOnly storage (localStorage, sessionStorage)
-      console.log('🔴 LOGOUT Step 3: Clearing client storage only')
-      if (typeof window !== 'undefined') {
-        localStorage.clear()
-        sessionStorage.clear()
-      }
-      
-      // Let NextAuth handle the logout properly with redirect
-      console.log('🔴 LOGOUT Step 4: Using NextAuth signOut with redirect')
       await signOut({ 
         callbackUrl: '/',
-        redirect: true  // Let NextAuth handle the redirect and cookie cleanup
+        redirect: true
       })
-      
     } catch (error) {
-      console.error('🔴 LOGOUT ERROR - Simplified catch block:', error)
-      
-      // Fallback: try NextAuth signout with redirect anyway
-      console.log('🔴 LOGOUT FALLBACK: Trying NextAuth signout')
-      try {
-        await signOut({ 
-          callbackUrl: '/',
-          redirect: true 
-        })
-      } catch (signOutError) {
-        console.error('🔴 LOGOUT FINAL ERROR:', signOutError)
-        // Last resort: manual redirect
-        window.location.replace('/')
-      }
+      window.location.replace('/')
+    } finally {
+      setIsLoading(false)
     }
   }
 
