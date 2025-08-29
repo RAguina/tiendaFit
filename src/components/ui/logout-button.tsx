@@ -22,28 +22,35 @@ export default function LogoutButton({
   const handleLogout = async () => {
     if (isLoading) return
 
+    console.log('🔴 LOGOUT STARTED - Step 1: Initialize')
     setIsLoading(true)
     
     try {
       // Debug: Show cookies before logout
+      console.log('🔴 LOGOUT Step 2: Checking cookies before logout')
       if (process.env.NODE_ENV === 'development') {
         console.log('🍪 Cookies before logout:', debugCookies())
       }
       
       // Clear cart before signing out (user-specific cart)  
+      console.log('🔴 LOGOUT Step 3: Clearing cart')
       try {
         await clearCart()
+        console.log('🔴 LOGOUT Step 3.1: Cart cleared successfully')
       } catch (cartError) {
-        console.warn('Error clearing cart during logout:', cartError)
+        console.warn('🔴 LOGOUT Step 3.2: Error clearing cart during logout:', cartError)
       }
       
       // Call optional callback
+      console.log('🔴 LOGOUT Step 4: Calling optional callback')
       onLogout?.()
       
       // Use our aggressive cleanup function
+      console.log('🔴 LOGOUT Step 5: Running aggressive cleanup')
       forceLogoutCleanup()
       
       // Sign out with NextAuth API call directly
+      console.log('🔴 LOGOUT Step 6: Attempting NextAuth API signout')
       try {
         const response = await fetch('/api/auth/signout', {
           method: 'POST',
@@ -58,35 +65,44 @@ export default function LogoutButton({
         })
         
         if (!response.ok) {
+          console.error('🔴 LOGOUT Step 6.1: API signout response not OK:', response.status, response.statusText)
           throw new Error('Failed to sign out via API')
         }
+        console.log('🔴 LOGOUT Step 6.2: API signout successful')
       } catch (apiError) {
-        console.warn('API signout failed, trying NextAuth signOut:', apiError)
+        console.warn('🔴 LOGOUT Step 6.3: API signout failed, trying NextAuth signOut:', apiError)
         
         // Fallback to NextAuth signOut
+        console.log('🔴 LOGOUT Step 7: Using NextAuth signOut fallback')
         await signOut({ 
           callbackUrl: '/',
           redirect: false 
         })
+        console.log('🔴 LOGOUT Step 7.1: NextAuth signOut completed')
       }
       
       // Final cleanup after signout
+      console.log('🔴 LOGOUT Step 8: Running final cleanup')
       forceLogoutCleanup()
       
       // Debug: Show cookies after logout
+      console.log('🔴 LOGOUT Step 9: Checking cookies after logout')
       if (process.env.NODE_ENV === 'development') {
         console.log('🍪 Cookies after logout:', debugCookies())
       }
       
       // Wait a moment for cleanup to complete, then redirect
+      console.log('🔴 LOGOUT Step 10: Preparing to redirect')
       setTimeout(() => {
+        console.log('🔴 LOGOUT Step 11: Redirecting to home page')
         window.location.replace('/')
       }, 100)
       
     } catch (error) {
-      console.error('Error during logout:', error)
+      console.error('🔴 LOGOUT ERROR - Catch block:', error)
       
       // Ultimate fallback: force cleanup and redirect
+      console.log('🔴 LOGOUT FALLBACK: Running ultimate cleanup and redirect')
       forceLogoutCleanup()
       window.location.replace('/')
     }
