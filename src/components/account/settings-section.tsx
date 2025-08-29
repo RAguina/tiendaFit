@@ -1,9 +1,10 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useState } from "react"
 import { useCurrency } from "@/contexts/currency-context"
 import { Currency, getCurrencyName } from "@/lib/currency"
+import LogoutButton from "@/components/ui/logout-button"
 
 export default function SettingsSection() {
   const { data: session } = useSession()
@@ -16,16 +17,7 @@ export default function SettingsSection() {
     security: true
   })
 
-  const handleSignOut = async () => {
-    setLoading(true)
-    try {
-      await signOut({ callbackUrl: '/' })
-    } catch (error) {
-      console.error('Error signing out:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Remove handleSignOut function since we're using LogoutButton now
 
   const handleNotificationChange = (key: keyof typeof notifications) => {
     setNotifications(prev => ({
@@ -237,13 +229,11 @@ export default function SettingsSection() {
           </h2>
         </div>
         <div className="p-6 space-y-4">
-          <button
-            onClick={handleSignOut}
-            disabled={loading}
-            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          <LogoutButton
+            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium"
           >
-            {loading ? 'Cerrando sesión...' : 'Cerrar Sesión'}
-          </button>
+            Cerrar Sesión
+          </LogoutButton>
           
           <button className="w-full bg-transparent text-red-600 py-3 px-4 rounded-lg border border-red-600 hover:bg-red-50 transition-colors font-medium">
             Eliminar Cuenta

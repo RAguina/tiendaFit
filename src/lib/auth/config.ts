@@ -79,7 +79,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? process.env.NEXTAUTH_URL?.replace(/^https?:\/\//, '') : undefined,
+        // Removing domain to avoid issues with subdomains/deployment URLs
       },
     },
     callbackUrl: {
@@ -92,7 +92,7 @@ export const authOptions: NextAuthOptions = {
       },
     },
     csrfToken: {
-      name: process.env.NODE_ENV === "production" ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.csrf-token" : "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
