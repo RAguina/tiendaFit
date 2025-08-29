@@ -6,6 +6,7 @@ import { z } from "zod"
 import { apiRateLimit, getClientIdentifier } from "@/lib/rate-limit"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { createMercadoPagoPreference } from "@/lib/mercadopago/utils"
+import { logger, securityLogger } from "@/lib/logger"
 
 const createPaymentSchema = z.object({
   orderId: z.string().min(1, "Order ID es requerido"),
@@ -132,14 +133,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ MercadoPago Preference Created:', {
-        orderId: order.id,
-        preferenceId: preference.id,
-        totalAmount: Number(order.total),
-        itemsCount: items.length
-      })
-    }
+    securityLogger.payment('MercadoPago Preference Created', order.id, Number(order.total))
 
     return NextResponse.json({
       preferenceId: preference.id,
@@ -160,7 +154,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error("Error creating payment:", error)
+    logger.error("Error creating payment:", error)
     return NextResponse.json(
       { error: "Error al crear el pago" },
       { status: 500 }

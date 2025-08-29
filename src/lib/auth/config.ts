@@ -2,10 +2,9 @@ import { NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
+import { logger, securityLogger } from "@/lib/logger"
 
-if (process.env.NODE_ENV === 'development') {
-  console.log("🔧 Auth Config Loading")
-}
+logger.log("Auth Config Loading")
 
 export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',

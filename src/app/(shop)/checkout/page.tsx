@@ -96,9 +96,9 @@ export default function CheckoutPage() {
       const orderData = {
         addressId: sanitizeUserInput(selectedAddressId),
         items: items.map(item => ({
-          productId: sanitizeUserInput(item.id.toString()),
+          productId: sanitizeUserInput(item.product.id),
           quantity: item.quantity,
-          price: item.price
+          price: Number(item.product.price)
         })),
         paymentMethod: sanitizeUserInput(paymentMethod),
         ...orderSummary
@@ -308,20 +308,20 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item.product.image || '/placeholder.png'}
+                      alt={item.product.name}
                       className="w-12 h-12 object-cover rounded-md"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {item.name}
+                        {item.product.name}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Cantidad: {item.quantity}
                       </p>
                     </div>
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${(Number(item.product.price) * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}

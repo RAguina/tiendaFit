@@ -36,37 +36,37 @@ export default function CartPage() {
           {items.map((item) => (
             <div key={item.id} className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
               <img 
-                src={item.image} 
-                alt={item.name}
+                src={item.product.image || '/placeholder.png'} 
+                alt={item.product.name}
                 className="w-16 h-16 object-cover rounded-md"
               />
               
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {item.name}
+                  {item.product.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">{item.category}</p>
+                <p className="text-gray-600 dark:text-gray-400">Stock: {item.product.stock}</p>
                 <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
-                  ${item.price}
+                  ${Number(item.product.price).toFixed(2)}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                   className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-md"
                 >
                   -
                 </button>
                 <span className="w-12 text-center">{item.quantity}</span>
                 <button
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                   className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-md"
                 >
                   +
                 </button>
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.product.id)}
                   className="ml-4 text-red-600 hover:text-red-700"
                 >
                   Eliminar
