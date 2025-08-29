@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useCart } from '@/contexts/cart-context'
 import { products, categories } from '@/lib/data/products'
+import { useAddToCart } from '@/hooks/use-add-to-cart'
+import AddToCartButton from '@/components/ui/add-to-cart-button'
 
 export default function ProductsPage() {
-  const { addToCart } = useCart()
+  const { handleAddToCart, isLoading, isSuccess } = useAddToCart()
   const [selectedCategory, setSelectedCategory] = useState("Todos")
 
   const filteredProducts = products.filter(product => {
@@ -44,11 +45,11 @@ export default function ProductsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform">
               <img 
                 src={product.image} 
                 alt={product.name}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <div className="p-4">
                 <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
@@ -60,12 +61,12 @@ export default function ProductsPage() {
                 <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-4">
                   ${product.price}
                 </p>
-                <button 
-                  onClick={() => addToCart(product.id, 1)}
-                  className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg transition-colors font-medium"
-                >
-                  Agregar al Carrito
-                </button>
+                <AddToCartButton
+                  isLoading={isLoading(product.id)}
+                  isSuccess={isSuccess(product.id)}
+                  onClick={() => handleAddToCart(product.id, 1)}
+                  size="sm"
+                />
               </div>
             </div>
           ))}

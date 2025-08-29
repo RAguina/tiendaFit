@@ -1,34 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { useCart } from '@/contexts/cart-context'
-import { useSession } from 'next-auth/react'
 import { products } from '@/lib/data/products'
+import { useAddToCart } from '@/hooks/use-add-to-cart'
+import AddToCartButton from '@/components/ui/add-to-cart-button'
 
 export default function HomePage() {
-  const { addToCart, loading } = useCart()
-  const { data: session } = useSession()
-  const [addingToCart, setAddingToCart] = useState<string | null>(null)
+  const { handleAddToCart, isLoading, isSuccess } = useAddToCart()
   const featuredProducts = products.slice(0, 3) // Get first 3 products
-
-  const handleAddToCart = async (productId: string) => {
-    if (!session) {
-      // Redirect to sign in or show modal
-      window.location.href = '/auth/signin'
-      return
-    }
-
-    try {
-      setAddingToCart(productId)
-      await addToCart(productId, 1)
-    } catch (error) {
-      console.error('Error adding to cart:', error)
-      // You might want to show a toast notification here
-    } finally {
-      setAddingToCart(null)
-    }
-  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900">
@@ -85,11 +64,11 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+              <div key={product.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 transform">
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover hover:scale-110 transition-transform duration-500"
                 />
                 <div className="p-6">
                   <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
@@ -101,13 +80,12 @@ export default function HomePage() {
                   <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-4">
                     ${product.price}
                   </p>
-                  <button 
-                    onClick={() => handleAddToCart(product.id)}
-                    disabled={addingToCart === product.id || loading}
-                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {addingToCart === product.id ? 'Agregando...' : 'Agregar al Carrito'}
-                  </button>
+                  <AddToCartButton
+                    isLoading={isLoading(product.id)}
+                    isSuccess={isSuccess(product.id)}
+                    onClick={() => handleAddToCart(product.id, 1)}
+                    size="md"
+                  />
                 </div>
               </div>
             ))}
