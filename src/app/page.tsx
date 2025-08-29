@@ -1,12 +1,34 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { useCart } from '@/contexts/cart-context'
+import { useSession } from 'next-auth/react'
 import { products } from '@/lib/data/products'
 
 export default function HomePage() {
-  const { addToCart } = useCart()
+  const { addToCart, loading } = useCart()
+  const { data: session } = useSession()
+  const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const featuredProducts = products.slice(0, 3) // Get first 3 products
+
+  const handleAddToCart = async (productId: string) => {
+    if (!session) {
+      // Redirect to sign in or show modal
+      window.location.href = '/auth/signin'
+      return
+    }
+
+    try {
+      setAddingToCart(productId)
+      await addToCart(productId, 1)
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      // You might want to show a toast notification here
+    } finally {
+      setAddingToCart(null)
+    }
+  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900">
@@ -80,10 +102,11 @@ export default function HomePage() {
                     ${product.price}
                   </p>
                   <button 
-                    onClick={() => addToCart(product)}
-                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg font-medium"
+                    onClick={() => handleAddToCart(product.id)}
+                    disabled={addingToCart === product.id || loading}
+                    className="w-full bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Agregar al Carrito
+                    {addingToCart === product.id ? 'Agregando...' : 'Agregar al Carrito'}
                   </button>
                 </div>
               </div>

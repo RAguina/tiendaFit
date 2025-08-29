@@ -1,6 +1,7 @@
 import { preference, MP_CONFIG, MP_PAYMENT_STATUS } from './config';
 // Note: Using any for PreferenceCreateData due to MercadoPago SDK types
 import { sanitizeUserInput } from '@/lib/sanitize';
+import { logger, securityLogger } from '@/lib/logger';
 
 interface OrderItem {
   id: string
@@ -79,14 +80,9 @@ export async function createMercadoPagoPreference(params: CreatePreferenceParams
       expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
     };
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔧 Creating MercadoPago Preference:', {
-        orderId: sanitizedOrderId,
-        itemsCount: sanitizedItems.length,
-        totalAmount: sanitizedItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0),
-        webhookUrl: MP_CONFIG.webhookUrl
-      });
-    }
+    securityLogger.payment('Creating MercadoPago Preference', sanitizedOrderId, 
+      sanitizedItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
+    );
 
     const response = await preference.create({ body: preferenceData });
     
@@ -96,7 +92,7 @@ export async function createMercadoPagoPreference(params: CreatePreferenceParams
       sandbox_init_point: response.sandbox_init_point!,
     };
   } catch (error) {
-    console.error('Error creating MercadoPago preference:', error);
+    logger.error('Error creating MercadoPago preference:', error);
     throw new Error('Failed to create payment preference');
   }
 }
@@ -120,20 +116,20 @@ export function validateWebhookSignature(
   try {
     // Basic check - required headers must be present
     if (!xSignature || !xRequestId || !dataId) {
-      console.error('❌ Missing required webhook headers');
+      securityLogger.security('Missing required webhook headers');
       return false;
     }
 
     // In development, validate signature but log detailed info for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔧 Development mode: Validating signature with debug info');
+      logger.debug('Development mode: Validating signature with debug info');
       // Continue with validation but with extra logging
     }
 
     // Get secret from environment variables
     const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
     if (!secret) {
-      console.error('❌ MERCADOPAGO_WEBHOOK_SECRET not configured');
+      securityLogger.security('MERCADOPAGO_WEBHOOK_SECRET not configured');
       return false;
     }
 
@@ -156,7 +152,7 @@ export function validateWebhookSignature(
     });
 
     if (!timestamp || !signature) {
-      console.error('❌ Invalid signature format - missing ts or v1');
+      securityLogger.security('Invalid webhook signature format - missing ts or v1');
       return false;
     }
 
@@ -167,11 +163,7 @@ export function validateWebhookSignature(
     const maxAge = 15 * 60 * 1000; // 15 minutes
 
     if (timeDiff > maxAge) {
-      console.error('❌ Webhook timestamp too old:', {
-        webhookTime: new Date(webhookTime),
-        now: new Date(now),
-        diffMinutes: timeDiff / (60 * 1000)
-      });
+      securityLogger.security('Webhook timestamp too old - potential replay attack');
       return false;
     }
 
@@ -188,24 +180,16 @@ export function validateWebhookSignature(
     // Compare signatures
     const isValid = expectedSignature === signature;
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('🔐 Signature validation:', {
-        manifest,
-        expectedSignature,
-        receivedSignature: signature,
-        isValid,
-        timestamp: new Date(webhookTime)
-      });
-    }
+    logger.debug('Signature validation result', { isValid, timestamp: new Date(webhookTime) });
 
     if (!isValid) {
-      console.error('❌ Invalid webhook signature');
+      securityLogger.security('Invalid webhook signature - request rejected');
     }
 
     return isValid;
 
   } catch (error) {
-    console.error('Error validating webhook signature:', error);
+    logger.error('Error validating webhook signature:', error);
     return false;
   }
 }
