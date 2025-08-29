@@ -8,16 +8,16 @@ if (!process.env.NEXTAUTH_URL && process.env.VERCEL_URL) {
   process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`
 }
 
-// Debug environment variables (dev only)
+// Environment validation (without logging sensitive info)
 if (process.env.NODE_ENV === 'development') {
-  console.log("🔧 NextAuth Environment Debug:")
-  console.log({
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? "✅ Set" : "❌ Missing",
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? "✅ Set" : "❌ Missing",
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? "✅ Set" : "❌ Missing",
-    DATABASE_URL: process.env.DATABASE_URL ? "✅ Set" : "❌ Missing",
-    NODE_ENV: process.env.NODE_ENV,
-  })
+  const requiredVars = ['NEXTAUTH_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'DATABASE_URL']
+  const missingVars = requiredVars.filter(varName => !process.env[varName])
+  
+  if (missingVars.length > 0) {
+    console.warn(`⚠️ Missing environment variables: ${missingVars.join(', ')}`)
+  } else {
+    console.log("✅ All required environment variables are set")
+  }
 }
 
 const handler = NextAuth(authOptions)
