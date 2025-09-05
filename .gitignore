@@ -29,6 +29,7 @@ next-env.d.ts
 .vscode/
 .idea/
 .claude/
+CLAUDE.md
 *.swp
 *.swo
 *~
