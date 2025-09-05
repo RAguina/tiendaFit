@@ -65,10 +65,11 @@
 - **CSP Policy**: Comprehensive Content Security Policy
 - **Admin Protection**: Role-based route access control
 
-### Recent Development Focus
-1. **Payment Integration**: Complete MercadoPago system with webhooks (commit: 06f356a)
-2. **Order Management**: Full checkout system implementation (commit: a7d7711)
-3. **Security Enhancements**: Advanced security measures suite (commits: a9326e7, 2a1ebef, 3b96de9)
+### Architecture Patterns Used
+1. **API Routes Pattern**: Uses Next.js API routes instead of Server Actions for all CRUD operations
+2. **Context API**: React Context for client-side state management (cart, theme, currency)
+3. **BFF Pattern**: Backend-for-Frontend with comprehensive validation and security
+4. **Mock Data Strategy**: Structured mock data ready for database seeding
 
 ### Key Files & Components
 
@@ -92,11 +93,11 @@
 
 ### Current Issues & Next Steps
 
-#### ⚠️ Areas Needing Attention
-- **Empty Hook**: `use-auth.ts` is empty (0 lines) - needs implementation
-- **Environment Setup**: Requires MercadoPago credentials configuration
-- **Production Webhook**: Needs proper signature validation implementation
-- **Rate Limiting**: Should migrate to Redis for production scalability
+#### ⚠️ Areas for Future Enhancement
+- **Admin Panel**: Component placeholders ready for implementation
+- **Product Seeding**: Mock data ready for database seeding
+- **Production Webhook**: Signature validation implemented, ready for production
+- **Rate Limiting**: Memory-based system implemented, Redis upgrade recommended for scale
 
 #### 🔧 Configuration Requirements
 - MercadoPago API keys (TEST and PROD environments)
@@ -120,6 +121,6 @@
 - **Scalability**: Designed for production with proper database relationships and API structure
 
 ---
-*Last updated: 2025-08-28*
-*Context: Post-implementation phase, comprehensive system ready for testing*
-*Next: End-to-end testing and production environment setup*
+*Last updated: 2025-09-05*
+*Context: Code cleanup completed, documentation updated to reflect real architecture*
+*Next: Admin panel implementation or production deployment preparation*
